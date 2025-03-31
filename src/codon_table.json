@@ -1,0 +1,23 @@
+{
+    "I": ["ATA", "ATC", "ATT"],
+    "M": ["ATG"],
+    "T": ["ACA", "ACC", "ACG", "ACT"],
+    "N": ["AAC", "AAT"],
+    "K": ["AAA", "AAG"],
+    "S": ["AGC", "AGT", "TCA", "TCC", "TCG", "TCT"],
+    "R": ["AGA", "AGG", "CGA", "CGC", "CGG", "CGT"],
+    "L": ["CTA", "CTC", "CTG", "CTT", "TTA", "TTG"],
+    "P": ["CCA", "CCC", "CCG", "CCT"],
+    "H": ["CAC", "CAT"],
+    "Q": ["CAA", "CAG"],
+    "V": ["GTA", "GTC", "GTG", "GTT"],
+    "A": ["GCA", "GCC", "GCG", "GCT"],
+    "D": ["GAC", "GAT"],
+    "E": ["GAA", "GAG"],
+    "G": ["GGA", "GGC", "GGG", "GGT"],
+    "F": ["TTC", "TTT"],
+    "Y": ["TAC", "TAT"],
+    "C": ["TGC", "TGT"],
+    "W": ["TGG"],
+    "*": ["TAA", "TAG", "TGA"]
+}
