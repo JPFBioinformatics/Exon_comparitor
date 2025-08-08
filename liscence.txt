@@ -1,0 +1,3 @@
+ExonComparator is subject to Case Western Reserve University (CWRU) intellectual property poliices
+This code was developed in a CWRU lab using CWRU resources, anyone can use it for scientific reasons
+but it cannot be used in a business venture wihtout the permission of CWRU

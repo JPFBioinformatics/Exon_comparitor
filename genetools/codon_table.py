@@ -3,7 +3,7 @@ import json
 # class to load our codon table and compare codons
 class CodonTable:
 
-    def __init__(self,file_path="src/codon_table.json"):
+    def __init__(self,file_path="genetools/codon_table.json"):
 
         try:
             with open(file_path,"r") as file:
@@ -28,15 +28,18 @@ class CodonTable:
 
         for idx,_ in enumerate(nuc_seq):
 
+            # clear codon
+            codon = None
+
             # take this nucleotide and the two after as a codon
-            codon = nuc_seq[idx:idx+3]
+            if idx+3 <= len(nuc_seq):
+                codon = nuc_seq[idx:idx+3]
 
             # if the codon is in possible codons then return the index position of the start of the next codon
             if codon in possible_codons:
                 return idx+3
             
-            # if codon has not been found and it is the last codon in th elist then return None
-            if idx == len(nuc_seq)-3:
-                print(f"Amino acid {amino_acid} not found")
+            # if you reach the end of the sequence without finding codon return None
+            elif codon == None:
                 return None
             

@@ -1,0 +1,115 @@
+I want to build a system that will automatically grab gene/exon information from ensembl online database
+must install maxentpy from https://github.com/kepbod/maxentpy.git
+must use python 3.10.11 or before, otherwise maxentpy will not work
+For guidance:
+    Yeo & Burge, 2004, "Maximum Entropy Modeling of Short Sequence Motifs with Applications to RNA Splicing Signals" 
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+what we need:
+    1. DNA sequence of gene
+    2. exon start/stop locations
+    3. exon phases
+    4. alignment/comparison
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+What we do:
+    1. map amino acids to exon
+        you can get the full amino acid sequence from ensembl, we will grab this still to check to make sure our mapping is correct but only store AA seq in exons
+    2. align nucleotides and/or amino acids between exons you are interested in 
+        nucloties done with blastn, amnio acids blastp with BLOSM62 for amino acid substittuion similarity
+        we default to global alignment, local is available but less useful for our applications (afaik)
+        alignment also includes a SCORE which is a measure of how similar the two sequences are after alignment (bigger number = more similar)
+    3. apply splice site analysis
+    4. inesrt query exon into dna seq, apply splice site analysis on new sequence
+    5. display results, show best alignment, alignment score, and splice site analysis before and after exon replacment
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+What we get from Ensembl:
+    1. find gene using name (other identifiers?)
+    2. find DNA, CDNA sequence for gene
+        possibly swich to using a full assembly/genome instead of gene's specific DNA, but keep it gene specific now for simplicity
+    3. find exon information
+        relevant exon info:
+            start / end
+                start and end nucleotide of the exon (inclusive of bounds)
+            
+            phase
+                shows where the exon/intron boundry is
+                    0 means boundry falls between codons (clean)
+                    1 means boundry is between 1st and 2nd nuc in a codon
+                    2 means boundry is between 2nd and 3rd nuc in a codon
+                    -1 means boundry/non coding region
+                each exon has a start and end phase
+                ensembl_phase:
+                    -1 = first nucleotide is in UTR
+                    0 = first nucleotide is the first of a codon (clean boundry)
+                    1 = first nucleotide is the second base of a codon (need 1 from end of last exon)
+                    2 = first nucleotide is the third base of a codon (needs 1 and 2 from end of last exon)
+                    0,1,2 are the NUMBER OF NUCLEOTIDES you need from the PREVIOUS exon
+                ensembl_end_phase:
+                    -1 = exon ends in CDS (non coding region)
+                    0 = last nucleotide is the end of a codon (clean boundry)
+                    1 = need the first 2 nucleotides from next codon to complete last codon in this exon
+                    2 = need the first nucleotide from next codon to complete last codon in this exon
+                    0,1,2 are the NUMBER OF NUCLEOTIDES of the split codon in THIS exon
+                        also could be considered the number of nucleoties to "drop" form this exon when mapping
+                        generally the amino acid the split codon codes for is assigned to the first exon it appears in
+
+                end phase of an exon will always have same phase value as the start pahse of the next exon
+                    ie. if exon 1 has end phase 1 then exon 2 will have start phase 1, meaning that the codon they share is split as 1 
+                    nucleotide in exon 1 (last one) and 2 nucleotides in exon 2 (first 2)
+            
+            strand
+                1 = sequence is coding left to right (foreward)
+                -1 = sequence is backwawrds, codes right to left (reverse)
+                indicates transcription direction
+            
+            seq_region_name
+                chromosome/scaffold where exon is located
+
+            version
+                internal ensembl version of exon, higher number is more recent
+            
+            rank 
+                exon number, starts at 1 so rand 1 is first exon in transcript
+
+            exon_id / id 
+                both the same value, the ensemblID of the exon usually the same
+            
+            parent
+                ensemblID of the parent transcript
+
+            constitutive
+                1 means exon appears in ALL trnascripts, 0 means it does not
+
+            assembly_name
+                genome assembly version that exon is anotatetd on
+
+            source 
+                who annotated and curated data
+                Ensembl (automatic) Havana/GENCODE (manual)
+            
+            feature_type
+                always exon for the exons, will be other things if you are not looking at exons
+                probably don't include this, we will be storing data in "Exon" table so that is implied
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+How users use:
+    1. first have user input what gene they want and what species
+    2. display the exons (just by rank) and basic gene info (description) so user can make sure search went well
+    3. get dna sequence, exons for both genes
+    4. map aa to exons
+    5. align (aa and cdna)
+    6. calculate splice site analysis for exon
+    7. allow user to scroll through/use rank to find exons (one displayed at a time in UI)
+    8. allow user to select acceptor and donor exon
+    9. calculate splice site analysis again for new seq
+    10. display new sequence 
+    11. summary slide with averages etc... for entire set of exons, possibly include best candidates for exon replacment
+
+    allow for user to swich between AA and nucleotide viewing (only show one at a time)
